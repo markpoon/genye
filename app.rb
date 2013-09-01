@@ -1,19 +1,45 @@
-require 'pry'
+require "sinatra/base"
 require 'pathname'
-require 'benchmark'
-require_relative 'sequence'
+require 'data_mapper'
+require 'dm-sqlite-adapter'
 
-use PryRescue::Rack if ENV["RACK_ENV"] == 'development'
+DataMapper::Logger.new($stdout, :debug)
+DataMapper.setup(:default, 'sqlite::memory:')
+require_relative 'lib/objects.rb'
+
+if settings.development?
+  require 'sinatra/reloader'
+  require 'benchmark'
+  require 'pry'
+end
 
 class Application < Sinatra::Base 
   enable :inline_templates
+
+  configure :development do
+    Bundler.require(:development)
+    register Sinatra::Reloader
+    include Benchmark
+    enable :logging
+    get '/bind' do
+      Binding.pry
+    end
+  end
+
+  configure :production do
+    Bundler.require(:production)
+  end
+
   get '/' do
     slim :index
   end
-  get '/bindings' do
-    Binding.pry
-  end
 end
+
+DataMapper.finalize.auto_migrate!
+
+path = Pathname.new("./public/snp/snp_short.txt")
+seq = Sequence.parse path
+User.new(sequence: seq)
 
 __END__
 @@layout
