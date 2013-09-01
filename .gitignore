@@ -3,5 +3,9 @@
 *.rbc
 *.sass-cache
 /pkg
+/.sass-cache
 /doc/api
 /Gemfile.lock
+
+public/.DS_Store
+.DS_Store
