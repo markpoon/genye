@@ -15,13 +15,13 @@ class Sequence
       snp = row.chomp.split(/\t/)
       snps[snp[1].intern].merge!(snp[2] => {rsid: snp[0].to_s, genes: snp[3]})
     end
-    Sequence.new(snps)
+    Sequence.create.build snps
   end
 
-  def initialize(chromosomes)
+  def build(chromosomes)
     self.chromosomes={}
     chromosomes.each do |name, genotypes|
-      self.chromosomes << Chromosome.new(name, genotypes)
+      self.chromosomes << Chromosome.create.build(name, genotypes)
     end
   end
 
@@ -43,16 +43,16 @@ class Chromosome
   belongs_to :sequence
   has n, :genotypes
 
-  def initialize(name, genotypes)
+  def build(name, genotypes)
     genotypes.each do |genotype|
-      self.genotypes << Genotype.new(*genotype)
+      self.genotypes << Genotype.create.build(*genotype)
     end
     self.name = name
   end
 
   def position(position=nil)
     return if position.nil?
-    Genotype.new position, self.genotypes[position]
+    Genotype.create position, self.genotypes[position]
   end
 end
 
@@ -61,15 +61,14 @@ class Genotype
   property :id, Serial
   property :position, Integer, :writer => :private, :index => true
   property :gene, String, :writer => :private
-  
-  belongs_to :chromosome
-  has n, :references, {:through => DataMapper::Resource}
 
-  def initialize(position, data)
+  has n, :references, :through => Resource
+  belongs_to :chromosome
+
+  def build(position, data)
     self.position=position
     self.gene=data[:genes]
-    binding.pry
-    self.rsid = Reference.new(rsid:data[:rsid])
+    self.references << Reference.create(rsid:data[:rsid])
   end
 
   def gene

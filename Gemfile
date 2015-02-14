@@ -1,6 +1,7 @@
 source 'http://www.rubygems.org'
 ruby '2.0.0'
 
+gem 'bio'
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'thin'

@@ -38,8 +38,8 @@ end
 DataMapper.finalize.auto_migrate!
 
 path = Pathname.new("./public/snp/snp_short.txt")
-seq = Sequence.parse path
-User.new(sequence: seq)
+u = User.create(name: "mark", email: "markpoon@me.com")
+u.sequences << Sequence.parse(path)
 
 __END__
 @@layout
